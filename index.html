@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>RSVP · Invitationix</title>
+<meta name="description" content="Kindly confirm your attendance.">
+<meta property="og:title" content="You're invited! Kindly RSVP">
+<meta property="og:description" content="Tap to find your name and confirm your attendance.">
+<meta property="og:type" content="website">
+<meta name="theme-color" content="#F6F1EB">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%235E4739'/%3E%3Ctext x='32' y='44' font-size='34' text-anchor='middle' fill='%23F6F1EB' font-family='Georgia%2Cserif' font-style='italic'%3Ei%3C/text%3E%3C/svg%3E">
+<style>
+  /*
+   * Smart RSVP wrapper for Invitationix.
+   * Shows the Google Apps Script RSVP page full-screen on Nix's own domain,
+   * so guests never see Google's "created by a Google Apps Script user" bar.
+   *
+   *   https://rsvp.invitationix.online/gabriel-sofia                  -> RSVP page
+   *   https://rsvp.invitationix.online/gabriel-sofia?view=table       -> Find my table
+   *   https://rsvp.invitationix.online/gabriel-sofia?view=dashboard&key=...  -> Couple dashboard
+   */
+  :root { --bg: #F6F1EB; --main: #5E4739; }
+  html, body { margin: 0; height: 100%; background: var(--bg); }
+  iframe { position: fixed; inset: 0; width: 100%; height: 100%; border: 0; display: block; background: transparent; }
+  .load { position: fixed; inset: 0; display: grid; place-items: center; font: 500 14px/1.4 system-ui, -apple-system, "Segoe UI", sans-serif; color: #8a7464; transition: opacity .4s; }
+  .load i { display: block; width: 34px; height: 34px; margin: 0 auto 12px; border-radius: 50%; border: 3px solid #e3d6c8; border-top-color: var(--main); animation: spin .9s linear infinite; }
+  .load.gone { opacity: 0; pointer-events: none; }
+  .msg { max-width: 360px; margin: 0 16px; text-align: center; }
+  .msg h1 { font: 400 28px/1.2 Georgia, serif; color: var(--main); margin: 0 0 8px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) { .load i { animation-duration: 3s; } }
+</style>
+</head>
+<body>
+<div class="load" id="load"><div class="msg"><i></i>Opening your invitation…</div></div>
+<script>
+  // ---- Paste the Web app URL from Apps Script (Deploy > Manage deployments). It ends in /exec.
+  var WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzH0VWTojNioueCpvuKcAdjcnQdOnCu0r8yx07Zx3WpahDf-vxHAKCt8uZxz_QqcBsDkw/exec';
+
+  (function () {
+    var params = new URLSearchParams(location.search);
+    // Event code comes from the path (/gabriel-sofia) or from ?e=gabriel-sofia
+    var parts = location.pathname.split('/').filter(Boolean);
+    var code = params.get('e') || '';
+    if (!code && parts.length) {
+      code = parts[parts.length - 1];
+      if (/\.html?$/i.test(code)) code = parts.length > 1 ? parts[parts.length - 2] : '';
+    }
+    code = decodeURIComponent(code || '').toLowerCase().replace(/[^a-z0-9-]/g, '');
+    var load = document.getElementById('load');
+
+    if (!code) {
+      load.innerHTML = '<div class="msg"><h1>Kindly RSVP</h1>Please open the RSVP button on your invitation to find your name.</div>';
+      return;
+    }
+
+    params.set('e', code);
+    var src = WEB_APP_URL + '?' + params.toString();
+    var frame = document.createElement('iframe');
+    frame.title = 'RSVP';
+    frame.allow = 'clipboard-write';
+    frame.src = src;
+    frame.onload = function () { load.classList.add('gone'); };
+    // If the page never loads (very slow network), still hide the spinner after a while.
+    setTimeout(function () { load.classList.add('gone'); }, 12000);
+    document.body.appendChild(frame);
+  })();
+</script>
+</body>
+</html>
