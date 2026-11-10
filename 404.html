@@ -12,6 +12,7 @@
 <link rel="icon" type="image/png" sizes="64x64" href="/favicon.png">
 <link rel="shortcut icon" href="/favicon.ico">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Bodoni+Moda&family=Jost:wght@400;600&display=swap">
 <style>
   /*
    * Smart RSVP wrapper for Invitationix.
@@ -30,11 +31,51 @@
   .load.gone { opacity: 0; pointer-events: none; }
   .msg { max-width: 360px; margin: 0 16px; text-align: center; }
   .msg h1 { font: 400 28px/1.2 Georgia, serif; color: var(--main); margin: 0 0 8px; }
+  /* Home page (someone opens rsvp.invitationix.online with no event in the link) */
+  .home { display: none; min-height: 100%; box-sizing: border-box; padding: 48px 20px; text-align: center; font-family: 'Jost', system-ui, -apple-system, "Segoe UI", sans-serif; color: #3B2C23;
+    background: radial-gradient(circle at 18% 8%, #fff 0, transparent 45%), radial-gradient(circle at 88% 95%, #eadfd1 0, transparent 50%), var(--bg); }
+  .home.on { display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  .home .card { box-sizing: border-box; width: 100%; max-width: 440px; background: #fff; border: 1px solid #eadfd1; border-radius: 22px; padding: 40px 28px 34px; box-shadow: 0 24px 60px rgba(60, 30, 15, .10); position: relative; }
+  .home .card:before { content: ""; position: absolute; inset: 8px; border: 1px solid rgba(195, 160, 107, .35); border-radius: 16px; pointer-events: none; }
+  .home img { width: 96px; height: auto; display: block; margin: 0 auto 14px; }
+  .home .word { font: 400 15px 'Bodoni Moda', Georgia, serif; letter-spacing: .34em; text-transform: uppercase; color: #5E4739; margin-left: .34em; }
+  .home .rule { width: 120px; height: 1px; margin: 22px auto; background: linear-gradient(90deg, transparent, #C3A06B, transparent); }
+  .home h1 { font: 400 34px/1.15 'DM Serif Display', Georgia, serif; margin: 0 0 12px; color: #3B2C23; }
+  .home h1 em { color: #a07a43; }
+  .home p { font-size: 16px; line-height: 1.55; color: #7b675b; margin: 0 auto; max-width: 340px; }
+  .home ol { text-align: left; margin: 22px auto 4px; padding: 0; list-style: none; max-width: 330px; counter-reset: s; }
+  .home li { counter-increment: s; display: flex; gap: 14px; align-items: flex-start; padding: 10px 0; font-size: 15px; line-height: 1.45; color: #5b4a40; border-top: 1px solid #f0e7dc; }
+  .home li:first-child { border-top: 0; }
+  .home li:before { content: counter(s); flex: none; width: 28px; height: 28px; border-radius: 50%; border: 1px solid #C3A06B; color: #a07a43; display: grid; place-items: center; font: 400 15px 'Bodoni Moda', Georgia, serif; }
+  .home .btns { display: grid; gap: 10px; margin-top: 26px; }
+  .home a.btn { display: block; padding: 14px 18px; border-radius: 999px; font: 600 13px 'Jost', system-ui, sans-serif; letter-spacing: .2em; text-transform: uppercase; text-decoration: none; }
+  .home a.primary { background: #5E4739; color: #F6F1EB; }
+  .home a.ghost { border: 1px solid #d9c7b3; color: #5E4739; }
+  .home small { display: block; margin-top: 26px; font-size: 13px; color: #9a8577; }
   @keyframes spin { to { transform: rotate(360deg); } }
   @media (prefers-reduced-motion: reduce) { .load i { animation-duration: 3s; } }
 </style>
 </head>
 <body>
+<main class="home" id="home">
+  <div class="card">
+    <img src="/logo.png" alt="Invitationix">
+    <div class="word">Invitationix</div>
+    <div class="rule"></div>
+    <h1>Looking for your <em>RSVP?</em></h1>
+    <p>Each RSVP page belongs to one invitation, so it opens from the invitation you received.</p>
+    <ol>
+      <li><span>Open the digital invitation the couple or celebrant sent you.</span></li>
+      <li><span>Tap the <b>RSVP</b> button on the invitation.</span></li>
+      <li><span>Type your name as written on the invitation and confirm.</span></li>
+    </ol>
+    <div class="btns">
+      <a class="btn primary" href="https://www.facebook.com/invitationix">Message Invitationix</a>
+      <a class="btn ghost" href="https://invitationix.online">Visit our website</a>
+    </div>
+    <small>Planning a celebration? We'd love to make your invitation.</small>
+  </div>
+</main>
 <div class="load" id="load"><div class="msg"><i></i>Opening your invitation…</div></div>
 <script>
   // ---- Paste the Web app URL from Apps Script (Deploy > Manage deployments). It ends in /exec.
@@ -53,7 +94,9 @@
     var load = document.getElementById('load');
 
     if (!code) {
-      load.innerHTML = '<div class="msg"><h1>Kindly RSVP</h1>Please open the RSVP button on your invitation to find your name.</div>';
+      load.style.display = 'none';
+      document.getElementById('home').classList.add('on');
+      document.title = 'Invitationix · RSVP';
       return;
     }
 
